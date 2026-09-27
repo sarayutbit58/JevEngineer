@@ -1,0 +1,33 @@
+{
+  "skill_name": "paperclipai-orchestrator",
+  "evals": [
+    {
+      "id": 1,
+      "name": "system_one_typesafe_optimization",
+      "prompt": "Our issue triage and TOR review workflow is taking too long because of slow LLM prompt-and-parse loops. Have our SystemOne Engineer design a TypeSafe Jev integration with Choice, Noul, and Score primitives for sub-second classification and calibrated confidence gating.",
+      "expected_output": "Routes correctly to SystemOne Engineer (436b6774-90b8-44fb-b51b-4d1018acee29), creates task with clear requirements on Jev primitives (Choice, Noul, Score) and confidence gating, and invokes heartbeat.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "thai_gov_tor_dispatch",
+      "prompt": "We just received a new Thai Government TOR for an e-Service digital transformation initiative. Ask our Thai Presales Engineer to do an initial compliance review focusing on e-GP guidelines, DGA standards, and GDCC cloud hosting.",
+      "expected_output": "Routes correctly to Thai Presales Engineer (c12f7855-0f2c-4b1a-82c1-e4e517288364), creates the task in Paperclip AI, and triggers heartbeat execution.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "full_stack_feature_delegation",
+      "prompt": "We need to build a new real-time WebSocket notification system for our web platform. Delegate this to the engineering team.",
+      "expected_output": "Routes to Principal Engineer or Backend Engineer, creates structured task with clear architecture requirements, and invokes heartbeat.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "monitor_company_and_runs",
+      "prompt": "Give me a status update on our Paperclip AI company. Are there any active or queued runs, and what is our team working on?",
+      "expected_output": "Checks server health, queries active runs and company issues, and summarizes the live status concisely.",
+      "files": []
+    }
+  ]
+}
