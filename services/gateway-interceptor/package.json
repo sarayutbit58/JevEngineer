@@ -1,0 +1,20 @@
+{
+  "name": "paperclip-system1-gateway-interceptor",
+  "version": "1.0.0",
+  "description": "System 1 Decision Fabric Interceptor powered by TypeSafe Jev for Paperclip AI",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "start": "node src/server.js"
+  },
+  "keywords": [
+    "typesafe",
+    "jev",
+    "system-one",
+    "paperclipai",
+    "decision-fabric"
+  ],
+  "author": "Antigravity & SystemOne Engineer",
+  "license": "MIT"
+}
