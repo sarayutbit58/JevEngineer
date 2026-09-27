@@ -1,0 +1,85 @@
+{
+  "id": "feature-sprint",
+  "name": "Full-Stack Enterprise Feature Sprint Cascade",
+  "description": "Orchestrates end-to-end software feature development across Product, Design, Backend, Frontend, and automated QA verification.",
+  "matchPatterns": [
+    "feature",
+    "sprint",
+    "component",
+    "API",
+    "endpoint",
+    "frontend",
+    "backend",
+    "full-stack"
+  ],
+  "stages": [
+    {
+      "stageId": "stage_1_product_spec",
+      "name": "Product Requirements & Acceptance Criteria",
+      "role": "VP of Product",
+      "tasks": [
+        {
+          "taskId": "prd_spec",
+          "title": "Product Specification & User Stories",
+          "agentName": "VP of Product",
+          "role": "pm",
+          "descriptionTemplate": "Write detailed PRD specification, user acceptance criteria, and edge-case requirements for {parentIdentifier}."
+        }
+      ]
+    },
+    {
+      "stageId": "stage_2_design_wireframes",
+      "name": "UI/UX & Design System Components",
+      "role": "Product Designer",
+      "tasks": [
+        {
+          "taskId": "ui_wireframes",
+          "title": "UI Wireframes & Component Design System",
+          "agentName": "Product Designer",
+          "role": "designer",
+          "descriptionTemplate": "Produce user interface wireframes and component layout specifications adhering to enterprise design standards based on {parentIdentifier}."
+        }
+      ]
+    },
+    {
+      "stageId": "stage_3_parallel_engineering",
+      "name": "Full-Stack Implementation (Backend + Frontend)",
+      "mode": "parallel",
+      "tasks": [
+        {
+          "taskId": "backend_api",
+          "title": "Backend Service & Database Implementation",
+          "agentName": "Backend Engineer",
+          "role": "engineer",
+          "descriptionTemplate": "Implement backend endpoints, business logic, and schema migrations specified in {parentIdentifier}."
+        },
+        {
+          "taskId": "frontend_ui",
+          "title": "Frontend UI Component Implementation",
+          "agentName": "Frontend Engineer",
+          "role": "engineer",
+          "descriptionTemplate": "Develop client UI components, state management, and user interaction flows specified in {parentIdentifier}."
+        }
+      ]
+    },
+    {
+      "stageId": "stage_4_qa_verification",
+      "name": "Automated Testing & Release Verification",
+      "mode": "sequential",
+      "tasks": [
+        {
+          "taskId": "qa_automation",
+          "title": "Automated Test Suite & Regression Verification",
+          "agentName": "Automation Test Engineer",
+          "role": "qa",
+          "descriptionTemplate": "Execute automated test suites, verify assertion coverage, and validate pull request diffs for {parentIdentifier}."
+        }
+      ],
+      "verification": {
+        "gateway": "E_QUALITY",
+        "minProbability": 0.80,
+        "maxRetries": 2
+      }
+    }
+  ]
+}

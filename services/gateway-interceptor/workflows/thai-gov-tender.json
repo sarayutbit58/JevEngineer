@@ -1,0 +1,73 @@
+{
+  "id": "thai-gov-tender",
+  "name": "Thai Government TOR Tender & Bid Proposal Cascade",
+  "description": "Orchestrates end-to-end Thai Government e-GP tender lifecycle from TOR review to parallel solution architecture, security compliance, and financial BOQ pricing.",
+  "matchPatterns": [
+    "TOR",
+    "Thai Government",
+    "e-GP",
+    "DGA",
+    "GDCC",
+    "tender",
+    "การจัดซื้อจัดจ้าง"
+  ],
+  "stages": [
+    {
+      "stageId": "stage_1_tor_review",
+      "name": "Initial TOR & Clause Compliance Review",
+      "role": "Thai Presales Engineer",
+      "verification": {
+        "gateway": "D_COMPLIANCE",
+        "minProbability": 0.75,
+        "maxRetries": 2
+      }
+    },
+    {
+      "stageId": "stage_2_solution_design",
+      "name": "Parallel Solution Architecture & BOQ Pricing",
+      "mode": "parallel",
+      "tasks": [
+        {
+          "taskId": "tech_architecture",
+          "title": "Technical Architecture & GDCC Cloud Sizing",
+          "agentName": "CTO",
+          "role": "cto",
+          "descriptionTemplate": "Review TOR requirements from parent issue {parentIdentifier}. Design comprehensive system architecture, GDCC cloud hosting sizing, and microservices integration blueprint."
+        },
+        {
+          "taskId": "security_pdpa",
+          "title": "Security, CII & PDPA Compliance Blueprint",
+          "agentName": "Head of Security",
+          "role": "security",
+          "descriptionTemplate": "Audit TOR specifications from parent issue {parentIdentifier}. Detail data protection measures under Thailand PDPA B.E. 2562, cybersecurity controls for CII, and audit log retention."
+        },
+        {
+          "taskId": "boq_costing",
+          "title": "Commercial Pricing Model & BOQ Estimation",
+          "agentName": "CFO",
+          "role": "cfo",
+          "descriptionTemplate": "Formulate project Bill of Quantities (BOQ), margin analysis, and median price assessment for parent issue {parentIdentifier} adhering to Thai e-GP guidelines."
+        }
+      ]
+    },
+    {
+      "stageId": "stage_3_final_proposal",
+      "name": "Executive Bid Proposal Compilation",
+      "mode": "sequential",
+      "tasks": [
+        {
+          "taskId": "final_submission_package",
+          "title": "Executive Proposal Package & Bid Submission Deck",
+          "agentName": "Thai Presales Engineer",
+          "role": "engineer",
+          "descriptionTemplate": "Assemble final proposal synthesizing CTO architecture, Security blueprint, and CFO financial BOQ into official Thai Government tender submission document."
+        }
+      ],
+      "verification": {
+        "gateway": "D_COMPLIANCE",
+        "minProbability": 0.85,
+        "maxRetries": 2
+      }
+    }
+  ]
+}
