@@ -6,9 +6,12 @@ import { runGatewayC } from './gateways/gateway-c-security.js';
 import { runGatewayD } from './gateways/gateway-d-compliance.js';
 import { runGatewayE } from './gateways/gateway-e-quality.js';
 
+import { ProxyServer } from './proxy-server.js';
+
 export {
   JevClient,
   ApprovalHandler,
+  ProxyServer,
   runGatewayA,
   runGatewayB,
   runGatewayC,

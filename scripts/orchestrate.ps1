@@ -3,12 +3,12 @@
     Paperclip AI Orchestration Helper Script with System 1 Decision Fabric (Jev by TypeSafe)
 .DESCRIPTION
     Provides automated commands for Antigravity to dispatch, monitor, and query Paperclip AI,
-    with embedded TypeSafe Jev Gateways (A-E) and Multi-Agent Workflow Cascade.
+    with embedded TypeSafe Jev Gateways (A-E), Transparent Reverse Proxy, and Multi-Agent Workflow Cascade.
 #>
 
 param(
     [Parameter(Mandatory=$true)]
-    [ValidateSet("status", "roster", "dispatch", "wake", "live", "log", "issues", "comments", "gate-triage", "gate-security", "gate-compliance", "gate-quality", "cascade-start", "cascade-status", "cascade-stop", "cascade-trigger")]
+    [ValidateSet("status", "roster", "dispatch", "wake", "live", "log", "issues", "comments", "gate-triage", "gate-security", "gate-compliance", "gate-quality", "cascade-start", "cascade-status", "cascade-stop", "cascade-trigger", "proxy-start", "proxy-status", "proxy-stop", "proxy-audit")]
     [string]$Action,
 
     [string]$AgentName,
@@ -23,15 +23,18 @@ param(
     [string]$TestResults,
     [string]$DiffSummary,
     [string]$CompanyId = "ba9c8f2b-7942-4917-aae5-8320e3a9a7c7",
-    [string]$ApiBase = "http://127.0.0.1:3100"
+    [string]$ApiBase = "http://127.0.0.1:3105"
 )
 
 $ErrorActionPreference = "Stop"
 $InterceptorDir = Join-Path $PSScriptRoot "..\services\gateway-interceptor"
 $InterceptorCli = Join-Path $InterceptorDir "src\cli.js"
+$InterceptorServer = Join-Path $InterceptorDir "src\server.js"
 $CascadeDaemon = Join-Path $InterceptorDir "src\cascade-daemon.js"
 $CascadePidFile = Join-Path $InterceptorDir "cascade-daemon.pid"
 $CascadeLogFile = Join-Path $InterceptorDir "cascade-daemon.log"
+$ProxyPidFile = Join-Path $InterceptorDir "proxy-server.pid"
+$ProxyLogFile = Join-Path $InterceptorDir "proxy-server.log"
 
 function Get-AgentMap {
     $rosterPath = Join-Path $PSScriptRoot "..\references\org_roster.json"
@@ -68,12 +71,80 @@ switch ($Action) {
         paperclipai health
         Write-Host "`n=== Company Details ===" -ForegroundColor Cyan
         paperclipai company current
+
+        # Check Proxy Health
+        try {
+            $proxyRes = Invoke-RestMethod -Uri "http://127.0.0.1:3105/health" -Method Get -TimeoutSec 2 -ErrorAction SilentlyContinue
+            if ($proxyRes) {
+                Write-Host "`n=== ⚡ Jev Reverse Proxy Status (Port 3105) ===" -ForegroundColor Green
+                Write-Host "Status: $($proxyRes.status) | Mode: $($proxyRes.mode) | Zero-Cache: $($proxyRes.zeroCacheMode) | Audits: $($proxyRes.auditCount)"
+                Write-Host "Target Paperclip Reachable: $($proxyRes.targetHealth.reachable)"
+            }
+        } catch {
+            Write-Host "`n=== ⚡ Jev Reverse Proxy (Port 3105) ===" -ForegroundColor Gray
+            Write-Host "Proxy is not currently running. Start it with: orchestrate.ps1 -Action proxy-start"
+        }
     }
 
     "roster" {
         Write-Host "=== Active Agents in Company $CompanyId ===" -ForegroundColor Green
         $agents = Get-AgentMap
         $agents | Select-Object name, role, title, id | Format-Table -AutoSize
+    }
+
+    "proxy-start" {
+        Write-Host "Starting TypeSafe Jev Synchronous Reverse Proxy on port 3105..." -ForegroundColor Yellow
+        $proc = Start-Process node -ArgumentList $InterceptorServer -PassThru -WindowStyle Hidden -RedirectStandardOutput $ProxyLogFile -RedirectStandardError $ProxyLogFile
+        Set-Content -Path $ProxyPidFile -Value $proc.Id -Encoding utf8
+        Start-Sleep -Milliseconds 800
+        Write-Host "Jev Reverse Proxy started successfully! PID: $($proc.Id) (Port: 3105 -> Target: 3100)" -ForegroundColor Green
+    }
+
+    "proxy-status" {
+        if (Test-Path $ProxyPidFile) {
+            $pidVal = Get-Content $ProxyPidFile -Raw
+            $proc = Get-Process -Id ([int]$pidVal.Trim()) -ErrorAction SilentlyContinue
+            if ($proc) {
+                Write-Host "Jev Reverse Proxy is RUNNING (PID: $($proc.Id)) on port 3105" -ForegroundColor Green
+            } else {
+                Write-Host "Proxy PID file exists ($pidVal) but process is NOT running." -ForegroundColor Red
+            }
+        } else {
+            Write-Host "Jev Reverse Proxy is STOPPED." -ForegroundColor Gray
+        }
+
+        try {
+            $health = Invoke-RestMethod -Uri "http://127.0.0.1:3105/health" -Method Get -TimeoutSec 2
+            Write-Host "`n=== Live Proxy Health ===" -ForegroundColor Cyan
+            $health | ConvertTo-Json -Depth 3 | Write-Host
+        } catch {}
+    }
+
+    "proxy-stop" {
+        if (Test-Path $ProxyPidFile) {
+            $pidVal = Get-Content $ProxyPidFile -Raw
+            try {
+                Stop-Process -Id ([int]$pidVal.Trim()) -Force -ErrorAction SilentlyContinue
+                Write-Host "Jev Reverse Proxy stopped (PID: $pidVal)" -ForegroundColor Yellow
+            } catch {}
+            Remove-Item $ProxyPidFile -Force -ErrorAction SilentlyContinue
+        } else {
+            Write-Host "Jev Reverse Proxy is not running." -ForegroundColor Gray
+        }
+    }
+
+    "proxy-audit" {
+        try {
+            $res = Invoke-RestMethod -Uri "http://127.0.0.1:3105/proxy/audit?limit=20" -Method Get
+            Write-Host "=== ⚡ Jev Reverse Proxy Audit Ring Buffer (Total: $($res.count)) ===" -ForegroundColor Cyan
+            if ($res.audits -and $res.audits.Count -gt 0) {
+                $res.audits | Select-Object timestamp, method, path, gateway, verdict, action, status, latencyMs | Format-Table -AutoSize
+            } else {
+                Write-Host "No requests intercepted yet." -ForegroundColor Gray
+            }
+        } catch {
+            Write-Host "Could not query /proxy/audit. Ensure Proxy is running on port 3105." -ForegroundColor Red
+        }
     }
 
     "gate-triage" {
