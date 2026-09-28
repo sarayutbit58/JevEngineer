@@ -4,7 +4,7 @@ import { InterceptorEngine } from './index.js';
 export class ProxyServer {
   constructor(options = {}) {
     this.targetBase = options.targetBase || process.env.PAPERCLIP_TARGET_URL || 'http://127.0.0.1:3100';
-    this.port = options.port || Number(process.env.GATEWAY_PORT || 3105);
+    this.port = (options.port !== undefined) ? options.port : Number(process.env.GATEWAY_PORT || 3105);
     this.engine = options.interceptor || new InterceptorEngine(options);
     this.auditBuffer = [];
     this.maxAuditEntries = options.maxAuditEntries || 100;
@@ -316,12 +316,16 @@ export class ProxyServer {
     });
 
     proxyReq.on('error', (err) => {
-      res.writeHead(502, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({
-        error: 'Bad Gateway: Could not reach Paperclip target server',
-        target: targetUrl.href,
-        message: err.message
-      }));
+      if (!res.headersSent) {
+        res.writeHead(502, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          error: 'Bad Gateway: Could not reach Paperclip target server',
+          target: targetUrl.href,
+          message: err.message
+        }));
+      } else {
+        res.destroy();
+      }
     });
 
     req.pipe(proxyReq);
@@ -344,12 +348,16 @@ export class ProxyServer {
     });
 
     proxyReq.on('error', (err) => {
-      res.writeHead(502, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({
-        error: 'Bad Gateway: Could not reach Paperclip target server',
-        target: targetUrl.href,
-        message: err.message
-      }));
+      if (!res.headersSent) {
+        res.writeHead(502, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+          error: 'Bad Gateway: Could not reach Paperclip target server',
+          target: targetUrl.href,
+          message: err.message
+        }));
+      } else {
+        res.destroy();
+      }
     });
 
     proxyReq.write(buffer);

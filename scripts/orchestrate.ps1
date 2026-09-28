@@ -35,6 +35,7 @@ $CascadePidFile = Join-Path $InterceptorDir "cascade-daemon.pid"
 $CascadeLogFile = Join-Path $InterceptorDir "cascade-daemon.log"
 $ProxyPidFile = Join-Path $InterceptorDir "proxy-server.pid"
 $ProxyLogFile = Join-Path $InterceptorDir "proxy-server.log"
+$ProxyErrFile = Join-Path $InterceptorDir "proxy-server.err.log"
 
 function Get-AgentMap {
     $rosterPath = Join-Path $PSScriptRoot "..\references\org_roster.json"
@@ -94,7 +95,7 @@ switch ($Action) {
 
     "proxy-start" {
         Write-Host "Starting TypeSafe Jev Synchronous Reverse Proxy on port 3105..." -ForegroundColor Yellow
-        $proc = Start-Process node -ArgumentList $InterceptorServer -PassThru -WindowStyle Hidden -RedirectStandardOutput $ProxyLogFile -RedirectStandardError $ProxyLogFile
+        $proc = Start-Process node -ArgumentList $InterceptorServer -PassThru -WindowStyle Hidden -RedirectStandardOutput $ProxyLogFile -RedirectStandardError $ProxyErrFile
         Set-Content -Path $ProxyPidFile -Value $proc.Id -Encoding utf8
         Start-Sleep -Milliseconds 800
         Write-Host "Jev Reverse Proxy started successfully! PID: $($proc.Id) (Port: 3105 -> Target: 3100)" -ForegroundColor Green

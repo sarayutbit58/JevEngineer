@@ -194,4 +194,35 @@ describe('Synchronous Transparent HTTP Reverse Proxy Interceptor', () => {
     assert.equal(blockedEntry.gateway, 'C_SECURITY');
     assert.equal(blockedEntry.status, 202);
   });
+
+  test('Resilience: non-JSON mutating body is forwarded without crashing the proxy', async () => {
+    const res = await fetch(`http://127.0.0.1:${proxyPort}/api/raw-upload`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: 'plain text data not JSON'
+    });
+    assert.equal(res.status, 200);
+    const data = await res.json();
+    assert.equal(data.success, true);
+  });
+
+  test('Resilience: returns 502 Bad Gateway when target server is unreachable', async () => {
+    // Point proxy to an unused closed port
+    const brokenProxy = new ProxyServer({
+      port: 0,
+      targetBase: 'http://127.0.0.1:59999',
+      interceptor: new InterceptorEngine({ apiKey: null })
+    });
+    await brokenProxy.start();
+    const brokenPort = brokenProxy.server.address().port;
+
+    try {
+      const res = await fetch(`http://127.0.0.1:${brokenPort}/api/companies`);
+      assert.equal(res.status, 502);
+      const data = await res.json();
+      assert.ok(data.error.includes('Bad Gateway'));
+    } finally {
+      await brokenProxy.stop();
+    }
+  });
 });
