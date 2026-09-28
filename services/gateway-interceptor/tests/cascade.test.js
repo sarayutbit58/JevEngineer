@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { CascadeEngine } from '../src/cascade-engine.js';
 
 describe('Multi-Agent Workflow Cascade Engine', () => {
-  const engine = new CascadeEngine();
+  // ponytail: force local_calibrated mode for deterministic test assertions
+  const engine = new CascadeEngine({ apiKey: null });
 
   test('Recipe Matching: matches titles to declarative workflow recipes', () => {
     const torRecipe = engine.matchRecipe('Thai Government e-GP DGA TOR Tender Platform');

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { InterceptorEngine } from '../src/index.js';
 
 describe('System 1 Decision Fabric (Jev by TypeSafe) - 5-Pillar Decision Mesh', () => {
-  const engine = new InterceptorEngine();
+  // ponytail: force local_calibrated mode for deterministic test assertions
+  const engine = new InterceptorEngine({ apiKey: null });
 
   test('Gateway A: Ingestion Router routes API header ticket to backend_engineer with fast_local tier', async () => {
     const ticket = {
